@@ -127,22 +127,30 @@ class Normalizer(Featurizer):
         max_value_for_offer_segment = {}
         all_features_by_offer_segment_period = self.featurizer.build_features(scope)
         for offer_segment_period, features in all_features_by_offer_segment_period.items():
-            min_value = min_value_for_offer_segment.get(offer_segment_period.offer_segment,{})
-            max_value = max_value_for_offer_segment.get(offer_segment_period.offer_segment,{})
+            min_value = min_value_for_offer_segment.get(offer_segment_period.offer_segment)
+            if min_value is None:
+                min_value = {}
+                min_value_for_offer_segment[offer_segment_period.offer_segment] = min_value
+            max_value = max_value_for_offer_segment.get(offer_segment_period.offer_segment)
+            if max_value is None:
+                max_value = {}
+                max_value_for_offer_segment[offer_segment_period.offer_segment] = max_value
+
             for feature_name, feature_value in features.items():
                 value = min_value.get(feature_name)
                 if value is None or feature_value < value:
-                    min_value[feature_name,feature_value]
+                    min_value[feature_name] = feature_value
                 value = max_value.get(feature_value)
                 if value is None or feature_value > value:
-                    max_value[feature_name,feature_value]
+                    max_value[feature_name] = feature_value
+
 
         result = {}
         for offer_segment_period, features in all_features_by_offer_segment_period.items():
             transformed_features = {}
             for feature_name, feature_value in features.items():
-                min_value = min_value_for_offer_segment[offer_segment_period.offer_segment]
-                max_value = max_value_for_offer_segment[offer_segment_period.offer_segment]
+                min_value = min_value_for_offer_segment[offer_segment_period.offer_segment][feature_name]
+                max_value = max_value_for_offer_segment[offer_segment_period.offer_segment][feature_name]
                 transformed_features[feature_name] = (feature_value - min_value)/(max_value-min_value)
             result[offer_segment_period,transformed_features]
 
@@ -160,8 +168,12 @@ class CompositeFeaturizer(Featurizer):
         for featurizer in self.featurizers:
             features_by_offer_segment_period = featurizer.build_features(scope)
             for offer_segment_period, features in features_by_offer_segment_period.items():
-                current = result.get(offer_segment_period,{})
+                current = result.get(offer_segment_period)
+                if current is None:
+                    current = {}
+                    result[offer_segment_period] = current
                 current.update(features)
+
         return result
 
 

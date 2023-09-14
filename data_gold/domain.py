@@ -77,8 +77,6 @@ class OfferSegmentPeriod:
 class Observation:
     offer_segment_period: OfferSegmentPeriod
     total_sales_qty: float
-    total_sales_amount: float
-
 
 @dataclass(frozen=True)
 class PriceDistribution:

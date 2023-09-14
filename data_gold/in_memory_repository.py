@@ -27,9 +27,9 @@ class BasicObservationRepository(ObservationRepository):
 
         bookings_by_sku_and_period = defaultdict(float)
         for label in labels_by_type[best_label_type]:
-            tramsactions = self.transaction_repository.find_by_category(label, scope.periods[0].start,
+            transaction_list = self.transaction_repository.find_by_category(label, scope.periods[0].start,
                                                                         scope.periods[-1].end)
-            for transaction in tramsactions:
+            for transaction in transaction_list.df.itertuples():
                 period = scope.segmentation_scheme.horizon.date_to_period[transaction.transaction_date]
                 bookings_by_sku_and_period[transaction.sku_number, period] += transaction.sales_qty
 
@@ -46,7 +46,7 @@ class BasicObservationRepository(ObservationRepository):
 
         result = []
         for k, v in bookings_by_offer_segment_period.items():
-            result.append(Observation(offer_segment_period=k, total_sales_qty=v, total_sales_amount=0.0))
+            result.append(Observation(offer_segment_period=k, total_sales_qty=v))
 
         return result
 

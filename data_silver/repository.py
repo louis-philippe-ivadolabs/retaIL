@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from data_silver.domain import Transaction
+from data_silver.domain import TransactionList
 
 
 class StoreDetailsRepository(ABC):
@@ -68,5 +68,5 @@ class SkuHistoryRepository(ABC):
 class TransactionRepository(ABC):
 
     @abstractmethod
-    def find_by_category(self, label: str, start_date: str, end_date: str) -> list[Transaction]:
+    def find_by_category(self, label: str, start_date: str, end_date: str) -> TransactionList:
         pass

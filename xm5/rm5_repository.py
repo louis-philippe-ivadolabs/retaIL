@@ -7,7 +7,7 @@ from pandas import DataFrame
 
 import pandas as pd
 
-from data_silver.domain import SkuDetails, Transaction, PriceHistory, SkuHistory, StoreDetails
+from data_silver.domain import SkuDetails, PriceHistory, SkuHistory, StoreDetails, TransactionList
 from data_silver.repository import SkuDetailsRepository, PriceHistoryRepository, TransactionRepository, \
     SkuHistoryRepository, StoreDetailsRepository
 
@@ -162,43 +162,34 @@ class M5TransactionRepository(TransactionRepository):
 
     def __init__(self, m5_data : M5Data):
         self.m5_data = m5_data
-        self.transactions_by_category = defaultdict(list)
-        calendar_df = self.m5_data.calendar_df[['d', 'date']]
-        self.mapping_date = {}
-        for record in calendar_df.to_records():
-            self.mapping_date[record.d] = record.date
+        self.df = None
+        self._preprocess()
 
-    def _convert(self, sales_df : DataFrame):
+    def _preprocess(self):
+        sales_df = self.m5_data.sales_train_validation
         column_names = sales_df.columns
-        key_columns =  column_names[0:6]
-        melted_df = sales_df.melt(id_vars=key_columns,var_name='d')
-        result = []
-        for record in melted_df.itertuples():
+        key_columns = column_names[0:6]
+        melted_df_1 = sales_df.melt(id_vars=key_columns, var_name='d',value_name='sales_qty')
 
-            transaction_id = uuid.uuid1()
-            transaction_datetime = self.mapping_date[record.d]
-            sku = record.item_id
-            store_number = record.store_id
-            sales_qty = record.value
-            if sales_qty == 0.0:
-                continue
-            sales_price = None
-            customer_loyalty_number = None
+        sales_df = self.m5_data.sales_train_evaluation
+        column_names = sales_df.columns
+        key_columns = column_names[0:6]
+        melted_df_2 = sales_df.melt(id_vars=key_columns, var_name='d',value_name='sales_qty')
 
-            transaction = Transaction(transaction_id=transaction_id,sku_number=sku,transaction_date=transaction_datetime,store_number=store_number,sales_qty=sales_qty,sales_price=sales_price,customer_loyalty_number=customer_loyalty_number)
-            result.append(transaction)
+        df = melted_df_2
+        df = df.astype({'sales_qty' : int})
 
-        return result
+        df = pd.merge(df, self.m5_data.calendar_df,on='d')
+        df = df.rename(columns={"item_id": "sku_number", "dept_id": "dept",'cat_id':'cat',
+                                'store_id':'store_number','date':'transaction_date'})
+        self.df = df[['sku_number','dept','cat','store_number','transaction_date','sales_qty']]
+
+    def find_by_category(self, label: str, start_date: str, end_date: str) -> TransactionList:
+
+        df = self.df
+        df = df[(df['dept'] == label) & (df['transaction_date'] >= start_date) & (df['transaction_date'] <= end_date)]
+        return TransactionList(df)
 
 
-    def find_by_category(self, label: str, start_date: str, end_date: str) -> list[Transaction]:
-        df = self.m5_data.sales_train_validation
-        df = df[df.cat_id == label]
-        transactions = self._convert(df)
 
-        df = self.m5_data.sales_train_evaluation
-        df = df[df.cat_id == label]
-        transactions_eval = self._convert(df)
-        all = transactions + transactions_eval
-        return [t for t in all if t.transaction_date >= start_date and t.transaction_date <= end_date ]
 

@@ -1,6 +1,8 @@
 from abc import ABC
 from copy import copy
 
+from catboost import CatBoostRegressor
+
 from data_gold.domain import Scope, OfferSegmentPeriod
 from data_gold.repository import ObservationRepository
 from model.featurizer import Featurizer
@@ -49,11 +51,11 @@ class CatBoostForecaster(Forecaster):
         self.empty_paraneters = None
 
     def train(self, training_scope: Scope):
-        features_collection = self.featurizer.build_features(scope=training_scope)
+        features_for_offer_segment_periods = self.featurizer.build_features(scope=training_scope)
         observations = self.observation_repository.find(training_scope)
         self.parameters_mapping = {}
         self.empty_paraneters = []
-        for features in features_collection:
+        for offer_segment_period, features in features_for_offer_segment_periods.items():
             for name, value in features.items():
                 index = self.parameters_mapping.get(name)
                 if index is None:
@@ -63,18 +65,40 @@ class CatBoostForecaster(Forecaster):
                         categorical = True
                     self.parameters_mapping[name] = (index, categorical)
                     if not categorical:
-                        self.empty_paraneters.append(index, 0)
+                        self.empty_paraneters.append(0)
                     else:
-                        self.empty_paraneters.append(index, "")
+                        self.empty_paraneters.append('')
 
         feature_array_list = []
         for obs in observations:
             offer_segment_period = obs.offer_segment_period
-            features = features_collection[offer_segment_period]
+            features = features_for_offer_segment_periods[offer_segment_period]
             features_array = copy(self.empty_paraneters)
             for name, value in features.items():
                 features_array[self.parameters_mapping[name]] = value
             feature_array_list.append(features_array)
 
-    def predict(self, scope: Scope) -> dict[OfferSegmentPeriod, float]:
-        pass
+        self.model = CatBoostRegressor()
+        self.model.fit(feature_array_list)
+
+    def predict(self, prediction_scope: Scope) -> dict[OfferSegmentPeriod, float]:
+        features_for_offer_segment_periods = self.featurizer.build_features(scope=prediction_scope)
+        feature_array_list = []
+        for offer_segment_period in prediction_scope.offer_segment_periods:
+            features = features_for_offer_segment_periods[offer_segment_period]
+            features_array = copy(self.empty_paraneters)
+            for name, value in features.items():
+                features_array[self.parameters_mapping[name]] = value
+            feature_array_list.append(features_array)
+
+        predictions = self.model.predict(feature_array_list())
+        result = {}
+        for i, offer_segment_period in enumerate(prediction_scope.offer_segment_periods):
+            result[offer_segment_period] = predictions[i]
+
+        return result
+
+
+
+
+

@@ -60,8 +60,8 @@ if __name__ == '__main__':
     sales_lag_1 = fb.sales_lag(1)
     sales_lag_2 = fb.sales_lag(2)
     log_price_lag_1 = fb.log(price_lag_1)
-    normalized_log_price_lag_1 = fb.normalize(log_price_lag_1, training_scope)
-    composite_features = fb.concat([price_lag_1, sales_lag_1, sales_lag_2, normalized_log_price_lag_1])
+ #   normalized_log_price_lag_1 = fb.normalize(log_price_lag_1, training_scope)
+    composite_features = fb.concat([price_lag_1, sales_lag_1, sales_lag_2])
 
     cat_boost_forecaster = CatBoostForecaster(featurizer=composite_features,
                                               observation_repository=observation_repository)
