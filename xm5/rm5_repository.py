@@ -176,10 +176,9 @@ class M5TransactionRepository(TransactionRepository):
         key_columns = column_names[0:6]
         melted_df_2 = sales_df.melt(id_vars=key_columns, var_name='d',value_name='sales_qty')
 
-        df = melted_df_2
-        df = df.astype({'sales_qty' : int})
-
-        df = pd.merge(df, self.m5_data.calendar_df,on='d')
+        df = pd.concat([melted_df_1,melted_df_2],ignore_index=True)
+        calendar_df = self.m5_data.calendar_df[['date','d']]
+        df = pd.merge(df,calendar_df,on='d')
         df = df.rename(columns={"item_id": "sku_number", "dept_id": "dept",'cat_id':'cat',
                                 'store_id':'store_number','date':'transaction_date'})
         self.df = df[['sku_number','dept','cat','store_number','transaction_date','sales_qty']]
