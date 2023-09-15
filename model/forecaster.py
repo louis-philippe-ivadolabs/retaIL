@@ -1,5 +1,6 @@
 from abc import ABC
 from copy import copy
+from dataclasses import replace
 
 from catboost import CatBoostRegressor
 
@@ -28,13 +29,18 @@ class LagForecaster(Forecaster):
 
     def predict(self, scope: Scope) -> dict[OfferSegmentPeriod, float]:
         result = {}
+        adjusted_periods = []
+        horizon = scope.segmentation_scheme.horizon
+        for period in scope.periods:
+            adjusted_periods.append(horizon.periods[period.index - self.lag])
+        observations = self.observation_repository.find(replace(scope,periods=adjusted_periods))
+        dict = {}
+        for obs in observations:
+            dict[obs.offer_segment_period] = obs
         for offer_segment_period in scope.offer_segment_periods:
-            horizon = scope.segmentation_scheme.horizon
             lag_period = horizon.periods[offer_segment_period.period.index - self.lag]
-            scope = Scope(segmentation_scheme=scope.segmentation_scheme,
-                          offer_segments=[offer_segment_period.offer_segment], period=lag_period)
-            observations = self.observation_repository.find(scope)
-            if observations:
+            obs = dict[replace(obs.offer_segment_period,period=lag_period)]
+            if obs:
                 result[offer_segment_period] = observations[0].total_sales_qty
             else:
                 result[offer_segment_period] = None
