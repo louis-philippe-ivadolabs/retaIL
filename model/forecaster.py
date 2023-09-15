@@ -31,7 +31,7 @@ class LagForecaster(Forecaster):
         for offer_segment_period in scope.offer_segment_periods:
             horizon = scope.segmentation_scheme.horizon
             lag_period = horizon.periods[offer_segment_period.period.index - self.lag]
-            scope = Scope(segmentatoin_scheme=scope.segmentation_scheme,
+            scope = Scope(segmentation_scheme=scope.segmentation_scheme,
                           offer_segments=[offer_segment_period.offer_segment], period=lag_period)
             observations = self.observation_repository.find(scope)
             if observations:
