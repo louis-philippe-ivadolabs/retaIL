@@ -94,7 +94,7 @@ class CatBoostForecaster(Forecaster):
                 features_array[self.parameters_mapping[name][0]] = value
             feature_array_list.append(features_array)
 
-        predictions = self.model.predict(feature_array_list())
+        predictions = self.model.predict(feature_array_list)
         result = {}
         for i, offer_segment_period in enumerate(prediction_scope.offer_segment_periods):
             result[offer_segment_period] = predictions[i]
