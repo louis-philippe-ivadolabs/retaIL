@@ -4,6 +4,9 @@ from dataclasses import replace
 from numbers import Number
 from typing import Any
 
+import pandas as pd
+from pandas import DataFrame
+
 from data_gold.domain import Scope, \
     OfferSegmentPeriod
 from data_gold.repository import ObservationRepository, PriceRepository, SkuStatusRepository
@@ -178,6 +181,26 @@ class CompositeFeaturizer(Featurizer):
 
         return result
 
+class PrecomputeFeaturizer(Featurizer):
+
+    def __init__(self, precomputed_feature_df : DataFrame):
+        self.precomputed_feature_df = precomputed_feature_df
+        self.precomputed_map = {}
+        feature_columns = [c for c in precomputed_feature_df.columns not in ['store_group_name','sku_group_name','start''end']]
+        for record in self.precomputed_feature_df.to_records():
+            features = {}
+            for feature_colunn in feature_columns:
+                features[feature_colunn] = record[feature_colunn]
+            self.precomputed_map[record.store_group_name,record.sku_group_name,record.start,record.end] = features
+
+    def build_features(self, scope: Scope) -> dict[OfferSegmentPeriod, dict[str, Any]]:
+        result = {}
+        for offer_segment_period in scope.offer_segment_periods:
+            features = self.precomputed_map.get(offer_segment_period,{})
+            result[offer_segment_period] = features
+
+        return result
+
 
 class FeatureBuilder:
 
@@ -201,6 +224,13 @@ class FeatureBuilder:
 
     def normalize(self, featurizer: Featurizer, scope: Scope):
         return Normalizer(scope=scope,featurizer=featurizer,observation_repository=self.observation_repository)
+
+    def precomputed_features_from_csv_file(selfs, csv_file_name : str ):
+        df = pd.read_csv(csv_file_name)
+        return PrecomputeFeaturizer(precomputed_feature_df=df)
+
+    def precomputed_features_from_df(selfs, df : DataFrame):
+        return PrecomputeFeaturizer(precomputed_feature_df=df)
 
     def concat(self, featurizers: list[Featurizer]) -> Featurizer:
         return CompositeFeaturizer(featurizers=featurizers)
