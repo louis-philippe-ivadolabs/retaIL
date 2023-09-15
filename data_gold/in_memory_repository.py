@@ -27,7 +27,7 @@ class BasicObservationRepository(ObservationRepository):
 
         bookings_by_sku_and_period = defaultdict(float)
         for label in labels_by_type[best_label_type]:
-            transaction_list = self.transaction_repository.find_by_category(label, scope.periods[0].start,
+            transaction_list = self.transaction_repository.find_by_category(best_label_type, label, scope.periods[0].start,
                                                                         scope.periods[-1].end)
             for transaction in transaction_list.df.itertuples():
                 period = scope.segmentation_scheme.horizon.date_to_period[transaction.transaction_date]

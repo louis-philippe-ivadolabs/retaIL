@@ -3,7 +3,6 @@ from abc import ABC
 from dataclasses import replace
 from numbers import Number
 from typing import Any
-import numpy as np
 
 from data_gold.domain import Scope, \
     OfferSegmentPeriod
@@ -37,34 +36,37 @@ class LagSalesFeaturizer(Featurizer):
         for offer_segment_period in scope.offer_segment_periods:
             features = {}
             lag_value = lag_by_offer_segment_period.get(offer_segment_period)
+            if lag_value is None:
+                lag_value = -1
             features[self.prefix] = lag_value
             result[offer_segment_period] = features
         return result
 
 
-class PriceSalesFeaturizer(Featurizer):
+class LagPriceFeaturizer(Featurizer):
 
     def __init__(self, lag_periods: int, price_repository: PriceRepository):
         self.price_repository = price_repository
         self.lag_periods = lag_periods
-        self.prefix = ""
+        self.prefix = "lag_price"
 
     def build_features(self, scope: Scope) -> dict[OfferSegmentPeriod, dict[str, Any]]:
         adjusted_periods = []
         for period in scope.periods:
-            adjusted_periods.append(scope.segmentation_scheme.horizon.periods[period.index + self.lag_periods])
+            adjusted_periods.append(scope.segmentation_scheme.horizon.periods[period.index - self.lag_periods])
         lag_scope = replace(scope, periods=adjusted_periods)
         price_observations = self.price_repository.find(lag_scope)
         lag_by_offer_segment_period = {}
         for obs in price_observations:
             original_period = scope.segmentation_scheme.horizon.periods[
                 obs.offer_segment_period.period.index + self.lag_periods]
-            print(obs.price_probabilities)
             lag_by_offer_segment_period[replace(obs.offer_segment_period, period=original_period)] = sum(k[1]*v for k,v in obs.price_probabilities.items())
         result = {}
         for offer_segment_period in scope.offer_segment_periods:
             features = {}
             lag_value = lag_by_offer_segment_period.get(offer_segment_period)
+            if lag_value is None:
+                lag_value = -1
             features[self.prefix] = lag_value
             result[offer_segment_period] = features
         return result
@@ -186,7 +188,7 @@ class FeatureBuilder:
         self.sku_status_repository = sku_status_repository
 
     def price_lag(self, lags_in_periods: int) -> Featurizer:
-        return PriceSalesFeaturizer(lag_periods=lags_in_periods, price_repository=self.price_repository,)
+        return LagPriceFeaturizer(lag_periods=lags_in_periods, price_repository=self.price_repository,)
 
     def sales_lag(self, lag: int) -> Featurizer:
         return LagSalesFeaturizer(lag_periods=lag,observation_repository=self.observation_repository)

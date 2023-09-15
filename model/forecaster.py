@@ -61,7 +61,7 @@ class CatBoostForecaster(Forecaster):
                 if index is None:
                     index = len(self.parameters_mapping)
                     categorical = False
-                    if isinstance(name, str):
+                    if isinstance(value, str):
                         categorical = True
                     self.parameters_mapping[name] = (index, categorical)
                     if not categorical:
@@ -75,11 +75,14 @@ class CatBoostForecaster(Forecaster):
             features = features_for_offer_segment_periods[offer_segment_period]
             features_array = copy(self.empty_paraneters)
             for name, value in features.items():
-                features_array[self.parameters_mapping[name]] = value
+                if value is None:
+                    print(name,offer_segment_period)
+                features_array[self.parameters_mapping[name][0]] = value
             feature_array_list.append(features_array)
 
-        self.model = CatBoostRegressor()
-        self.model.fit(feature_array_list)
+        cat_features = [v[0] for k,v in self.parameters_mapping.items() if v[1]]
+        self.model = CatBoostRegressor(cat_features=cat_features)
+        self.model.fit(feature_array_list,[obs.total_sales_qty for obs in observations])
 
     def predict(self, prediction_scope: Scope) -> dict[OfferSegmentPeriod, float]:
         features_for_offer_segment_periods = self.featurizer.build_features(scope=prediction_scope)
@@ -88,7 +91,7 @@ class CatBoostForecaster(Forecaster):
             features = features_for_offer_segment_periods[offer_segment_period]
             features_array = copy(self.empty_paraneters)
             for name, value in features.items():
-                features_array[self.parameters_mapping[name]] = value
+                features_array[self.parameters_mapping[name][0]] = value
             feature_array_list.append(features_array)
 
         predictions = self.model.predict(feature_array_list())

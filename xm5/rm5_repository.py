@@ -184,10 +184,10 @@ class M5TransactionRepository(TransactionRepository):
                                 'store_id':'store_number','date':'transaction_date'})
         self.df = df[['sku_number','dept','cat','store_number','transaction_date','sales_qty']]
 
-    def find_by_category(self, label: str, start_date: str, end_date: str) -> TransactionList:
+    def find_by_category(self, label_type : str, label: str, start_date: str, end_date: str) -> TransactionList:
 
         df = self.df
-        df = df[(df['dept'] == label) & (df['transaction_date'] >= start_date) & (df['transaction_date'] <= end_date)]
+        df = df[(df[label_type] == label) & (df['transaction_date'] >= start_date) & (df['transaction_date'] <= end_date)]
         return TransactionList(df)
 
 

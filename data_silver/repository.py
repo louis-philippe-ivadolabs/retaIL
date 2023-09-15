@@ -68,5 +68,5 @@ class SkuHistoryRepository(ABC):
 class TransactionRepository(ABC):
 
     @abstractmethod
-    def find_by_category(self, label: str, start_date: str, end_date: str) -> TransactionList:
+    def find_by_category(self, label_type : str, label: str, start_date: str, end_date: str) -> TransactionList:
         pass
