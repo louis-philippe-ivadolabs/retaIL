@@ -1,6 +1,7 @@
 from bisect import bisect_right, bisect_left
 from dataclasses import dataclass
 from datetime import datetime
+from typing import NamedTuple
 
 from pandas import DataFrame
 
@@ -46,12 +47,10 @@ class SkuHistory:
 
 
 @dataclass
-class TransactionList:
+class Transaction(NamedTuple):
 
-    fields = ['transaction_date','store_number','sku_number','sales_qty']
-    df : DataFrame
+    transaction_date : str
+    store_number : str
+    sku_number : str
+    sales_qty: float
 
-    def __post_init__(self):
-        not_in_fields = [f for f in self.fields if f not in self.df.columns]
-        if not_in_fields:
-            raise ValueError(str(not_in_fields) + " are required in the dataframe")

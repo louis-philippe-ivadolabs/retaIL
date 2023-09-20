@@ -15,23 +15,14 @@ class BasicObservationRepository(ObservationRepository):
             self.sku_details_by_sku[sku_details.sku_number] = sku_details
 
     def find(self, scope: Scope) -> list[Observation]:
-        labels_by_type = defaultdict(set)
-        for offer_segment in scope.offer_segments:
-            sku_group: SkuGroup = scope.segmentation_scheme.sku_segmentation.sku_groups[offer_segment.sku_group_name]
-            for sku in sku_group.skus:
-                sku_details = self.sku_details_by_sku[sku]
-                for label_type, label_value in sku_details.labels.items():
-                    labels_by_type[label_type].add(label_value)
 
-        best_label_type = min(labels_by_type, key=lambda k: len(labels_by_type[k]))
+        sku_store_dates = scope.sku_store_dates
 
         bookings_by_sku_and_period = defaultdict(float)
-        for label in labels_by_type[best_label_type]:
-            transaction_list = self.transaction_repository.find_by_category(best_label_type, label, scope.periods[0].start,
-                                                                        scope.periods[-1].end)
-            for transaction in transaction_list.df.itertuples():
-                period = scope.segmentation_scheme.horizon.date_to_period[transaction.transaction_date]
-                bookings_by_sku_and_period[transaction.sku_number, period] += transaction.sales_qty
+        transaction_list = self.transaction_repository.find_by_sku_store_and_date(sku_store_dates)
+        for transaction in transaction_list:
+            period = scope.segmentation_scheme.horizon.date_to_period[transaction.transaction_date]
+            bookings_by_sku_and_period[transaction.sku_number, period] += transaction.sales_qty
 
         bookings_by_offer_segment_period = defaultdict(float)
         for offer_segment in scope.offer_segments:

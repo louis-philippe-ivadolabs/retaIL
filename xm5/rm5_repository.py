@@ -7,7 +7,7 @@ from pandas import DataFrame
 
 import pandas as pd
 
-from data_silver.domain import SkuDetails, PriceHistory, SkuHistory, StoreDetails, TransactionList
+from data_silver.domain import SkuDetails, PriceHistory, SkuHistory, StoreDetails, Transaction
 from data_silver.repository import SkuDetailsRepository, PriceHistoryRepository, TransactionRepository, \
     SkuHistoryRepository, StoreDetailsRepository
 
@@ -183,11 +183,20 @@ class M5TransactionRepository(TransactionRepository):
                                 'store_id':'store_number','date':'transaction_date'})
         self.df = df[['sku_number','dept','cat','store_number','transaction_date','sales_qty']]
 
-    def find_by_category(self, label_type : str, label: str, start_date: str, end_date: str) -> TransactionList:
+    def find_by_category(self, label_type : str, label: str, start_date: str, end_date: str) -> list[Transaction]:
 
         df = self.df
         df = df[(df[label_type] == label) & (df['transaction_date'] >= start_date) & (df['transaction_date'] <= end_date)]
-        return TransactionList(df)
+        return df.itertuples()
+
+    def find_by_sku_store_and_date(self, sku_store_dates : list[str,str,str])->list[Transaction]:
+        df = self.df
+        records = []
+        for sku_store_date in sku_store_dates:
+            records.append({'sku_number' : sku_store_date[0],'store_number' : sku_store_date[1],'transaction_date' : sku_store_date[2]})
+        scope_df = pd.DataFrame(records)
+        df = pd.merge(df,scope_df)
+        return df.itertuples()
 
 
 

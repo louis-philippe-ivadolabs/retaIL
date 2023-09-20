@@ -54,8 +54,6 @@ class SegmentationScheme:
                 result.append(OfferSegment(store_group_name, sku_group_name))
         return result
 
-
-
 @dataclass(frozen=True)
 class OfferSegment:
     store_group_name: str
@@ -71,6 +69,21 @@ class OfferSegmentPeriod:
     @property
     def offer_segment(self):
         return OfferSegment(store_group_name=self.store_group_name,sku_group_name=self.sku_group_name)
+
+
+    @staticmethod
+    def to_sku_store_dates(segmentation_scheme : SegmentationScheme,  offer_segment_periods : list['OfferSegmentPeriod']):
+        sku_store_dates = []
+        for offer_segment_period in offer_segment_periods:
+            sku_group = segmentation_scheme.sku_segmentation.sku_groups[offer_segment_period.offer_segment.sku_group_name]
+            store_group = segmentation_scheme.store_segmentation.store_groups[offer_segment_period.store_group_name]
+            all_dates = segmentation_scheme.horizon.period_to_dates[offer_segment_period.period]
+            for sku in sku_group.skus:
+                for store in store_group.stores:
+                    for date in all_dates:
+                        sku_store_dates.append((sku, store, date))
+
+        return sku_store_dates
 
 
 @dataclass(frozen=True)
@@ -103,3 +116,7 @@ class Scope:
             for period in self.periods:
                 result.append(OfferSegmentPeriod(offer_segment.store_group_name,offer_segment.sku_group_name, period))
         return result
+
+    @property
+    def sku_store_dates(self):
+        return OfferSegmentPeriod.to_sku_store_dates(self.segmentation_scheme, self.offer_segment_periods)
