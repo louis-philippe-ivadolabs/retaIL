@@ -1,19 +1,28 @@
 from abc import abstractmethod
 from typing import Tuple, TypeVar
 
+import pandas as pd
+
 
 class Dataset:
 
-    def to_df() -> pd.DataFrame:
+    def to_df(self) -> pd.DataFrame:
         pass
 
 
 class EmptyDataset(Dataset):
-    pass
+
+    def to_df(self) -> pd.DataFrame:
+        return pd.DataFrame()
 
 
 class DemandDataset(Dataset):
-    pass
+
+    def __init__(self, data: pd.DataFrame):
+        self._data = data
+
+    def to_df(self) -> pd.DataFrame:
+        return self._data
 
 
 # Create a logical type that represents all sub classe of Dataset
