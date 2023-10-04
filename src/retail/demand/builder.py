@@ -1,34 +1,38 @@
 from typing import Tuple, List
 
+from retail.demand.GenericDemandPredictor import GenericDemandPredictor
 from retail.demand.interfaces import DemandPredictor
-from retail.domain import DemandDataset, Transformer, SplitStrategy
+from retail.domain import DemandDataset, Transformer, SplitStrategy, Feature
 from retail.split.basic import NOPSplitStrategy
 
 
 class DemandModelBuilder:
 
-    def __init__(self, raw_demand_dataset: DemandDataset):
-        self._raw_data = raw_demand_dataset
-        self._pipeline = []
+    def __init__(self):
+        self._transformer_list = []
         self._split_strategy = NOPSplitStrategy()
+        self._feature_list = []
+        self._demand_predictor = None
 
-    def with_transform_pipeline(self, pipeline: List[Transformer]) -> "DemandModelBuilder":
-        self._pipeline.extend(pipeline)
+    def with_transformer_list(self, transformer_list: List[Transformer]) -> "DemandModelBuilder":
+        self._transformer_list.extend(transformer_list)
         return self
 
     def with_split(self, strategy: SplitStrategy) -> "DemandModelBuilder":
         self._split_strategy = strategy
         return self
 
-    def build(self) -> Tuple[DemandPredictor, DemandDataset, DemandDataset, DemandDataset]:
-        # Go through the transformers
-        dataset = self._raw_data
-        for transformer in self._pipeline:
-            dataset = transformer.transform(self._raw_data)
+    def with_demand_predictor(self, demand_predictor: DemandPredictor):
+        self._demand_predictor = demand_predictor
+        return self
 
-        # Split in test, train, validation
-        train, test, validation = self._split_strategy.split(dataset)
+    def with_feature_list(self, feature_list: List[Feature]):
+        self._feature_list = feature_list
+        return self
 
-        # train
-
-        return DemandPredictor(), train, test, validation
+    def build(self) -> GenericDemandPredictor:
+        return GenericDemandPredictor(
+            self._feature_list,
+            self._demand_predictor,
+            self._transformer_list
+        )

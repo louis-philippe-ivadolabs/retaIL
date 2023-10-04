@@ -6,6 +6,11 @@ class Feature(Transformer):
         pass
 
 
+class FeatureSelector(Transformer):
+    def transform(self, dataset: Dataset) -> Dataset:
+        pass
+
+
 class Scope(Transformer):
 
     def transform(self, dataset: Dataset) -> Dataset:
@@ -16,4 +21,11 @@ class Aggregator(Transformer):
 
     def transform(self, dataset: Dataset) -> Dataset:
         pass
+
+
+class Featurizer(Transformer):
+
+    def transform(self, dataset: Dataset) -> Dataset:
+        pass
+
 
