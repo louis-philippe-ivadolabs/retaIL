@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "retaIL"
+version = "2.0"
+description = ""
+authors = ["Louis-Philippe Bigras <louis-philippe.bigras@ivadolabs.com>", "Mehdi Towhidi <mehdi.towhidi@ivadolabs.com>", "Guy Massé <guy.masse@ivadolabs.com>"]
+readme = "README.md"
+packages = [
+    { include = "*", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+pandas = "^2.1.1"
+kaggle = "^1.5.16"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
