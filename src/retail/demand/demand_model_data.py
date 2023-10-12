@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import pandera as pa
 
-from retail.data_process.interfaces import BronzeToSilver, SilverToGold
+from retail.data_layer.interfaces import BronzeToSilver, SilverToGold
 from retail.schema import SalesSchema, CatalogSchema, CalendarSchema, DemandModelInputSchema
 
 

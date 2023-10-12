@@ -1,6 +1,6 @@
 import pandas as pd
 import pandera as pa
-from retail.data_process.interfaces import SilverToGold
+from retail.data_layer.interfaces import SilverToGold
 from retail.schema import SalesSchema, CatalogSchema, CalendarSchema, DemandModelInputSchema
 
 

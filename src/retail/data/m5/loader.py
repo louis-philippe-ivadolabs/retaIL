@@ -4,7 +4,7 @@ import os.path
 import pandas as pd
 import pandera as pa
 
-from retail.data_process.interfaces import BronzeToSilver
+from retail.data_layer.interfaces import BronzeToSilver
 
 from retail.domain import DemandDataset
 from retail.schema import CalendarSchema, CatalogSchema, SalesSchema

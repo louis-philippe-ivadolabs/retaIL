@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from retail.data.m5.loader import M5DataLoader
-from retail.data_process.generic_silver_to_gold import GenericSilverToGold
+from retail.data_layer.generic_silver_to_gold import GenericSilverToGold
 from retail.demand.demand_model_data import DemandModelDataLoader
 from retail.demand.CatBoostDemandPredictor import CatBoostDemandPredictor
 from retail.demand.builder import DemandModelBuilder
