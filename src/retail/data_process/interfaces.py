@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import pandera as pa
 
 from retail.schema import SalesSchema, CatalogSchema, CalendarSchema, DemandModelInputSchema
@@ -19,15 +21,3 @@ class SilverToGold:
                   ) -> pa.typing.DataFrame[DemandModelInputSchema]:
         pass
 
-
-# Find the right place for this class (involving both data and model specs)
-class DemandModelDataLoader:
-    def __init__(self,
-                 bronze_to_silver: BronzeToSilver,
-                 silver_to_gold: SilverToGold):
-        self._bronze_to_silver = bronze_to_silver
-        self._silver_to_gold = silver_to_gold
-
-    def get_gold_dataset(self):
-        return self._silver_to_gold.get_gold_dataset(
-                    *self._bronze_to_silver.get_silver_datasets())
