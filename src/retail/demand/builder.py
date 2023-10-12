@@ -1,6 +1,6 @@
 from typing import Tuple, List
 
-from retail.demand.GenericDemandPredictor import GenericDemandPredictor
+from retail.demand.generic_demand_predictor import GenericDemandPredictor
 from retail.demand.interfaces import DemandPredictor
 from retail.domain import DemandDataset, Transformer, SplitStrategy, Feature
 from retail.split.basic import NOPSplitStrategy

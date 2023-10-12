@@ -3,15 +3,15 @@ from unittest import TestCase
 from retail.data.m5.loader import M5DataLoader
 from retail.data_layer.generic_silver_to_gold import GenericSilverToGold
 from retail.demand.demand_model_data import DemandModelDataLoader
-from retail.demand.CatBoostDemandPredictor import CatBoostDemandPredictor
+from retail.demand.cat_boost_demand_predictor import CatBoostDemandPredictor
 from retail.demand.builder import DemandModelBuilder
 from retail.evaluator.generic_evaluator import GenericEvaluator
-from retail.transformer.DemandAggregator import AggregationLevel, DemandAggregator
-from retail.transformer.DemandFeatureSelector import DemandFeatureSelector
-from retail.transformer.DemandScope import DemandScope
+from retail.transformer.demand_aggregator import AggregationLevel, DemandAggregator
+from retail.transformer.demand_feature_selector import DemandFeatureSelector
+from retail.transformer.demand_scope import DemandScope
 from retail.domain import Feature
-from retail.transformer.LaggedFeature import LaggedFeature
-from retail.transformer.NoSaleSkus import NoSaleSkus
+from retail.transformer.lagged_feature import LaggedFeature
+from retail.transformer.no_sale_skus import NoSaleSkus
 
 
 class WorkflowTestCase(TestCase):

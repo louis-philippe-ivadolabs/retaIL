@@ -6,8 +6,7 @@ import pandera as pa
 
 from retail.data_layer.interfaces import BronzeToSilver
 
-from retail.domain import DemandDataset
-from retail.schema import CalendarSchema, CatalogSchema, SalesSchema
+from retail.data_layer.schema import CalendarSchema, CatalogSchema, SalesSchema
 
 
 class M5DataLoader(BronzeToSilver):
