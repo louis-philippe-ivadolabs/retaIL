@@ -11,13 +11,11 @@ from retail.transformer.demand_feature_selector import DemandFeatureSelector
 from retail.transformer.demand_scope import DemandScope
 from retail.domain import Feature
 from retail.transformer.lagged_feature import LaggedFeature
-from retail.transformer.no_sale_skus import NoSaleSkus
 
 
 class WorkflowTestCase(TestCase):
 
     def test_simple_workflow(self):
-        m5_data = DemandModelDataLoader(M5DataLoader(), GenericSilverToGold()).get_demand_model_data()
 
 
         feature_list = [
@@ -56,8 +54,6 @@ class WorkflowTestCase(TestCase):
 
         aggregator = DemandAggregator(AggregationLevel["year_week"], feature_list)
 
-        no_sale_skus = NoSaleSkus(m5_data)
-
         model = DemandModelBuilder(
         ).with_demand_predictor(
             demand_predictor
@@ -66,18 +62,19 @@ class WorkflowTestCase(TestCase):
         ).with_transformer_list(
             [
                 demand_scope,
-                no_sale_skus,
                 *lagged_features,
                 aggregator,
                 feature_selector
             ]
         ).build()
 
-        transformed_demand = model.transform(m5_data.gold_df)
+        m5_data = DemandModelDataLoader(M5DataLoader(), GenericSilverToGold()).get_demand_model_data()
+
+        transformed_demand = model.transform(m5_data)
 
         model.fit(transformed_demand)
 
         m5_demand_validation = DemandModelDataLoader(M5DataLoader(sales_file="sales_train_validation.csv"),
                                                      GenericSilverToGold()).get_demand_model_data()
-        transformed_m5_evaluation = model.transform(m5_demand_validation.gold_df)
+        transformed_m5_evaluation = model.transform(m5_demand_validation)
         print(GenericEvaluator(model)(transformed_m5_evaluation))
