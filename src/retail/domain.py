@@ -32,6 +32,10 @@ DatasetSubclasses = TypeVar("DatasetSubclasses", bound=Dataset)
 class Transformer:
 
     @abstractmethod
+    def fit_transform(self, dataset: DatasetSubclasses) -> DatasetSubclasses:
+        pass
+
+    @abstractmethod
     def transform(self, dataset: DatasetSubclasses) -> DatasetSubclasses:
         pass
 

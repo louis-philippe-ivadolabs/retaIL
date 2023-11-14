@@ -70,7 +70,7 @@ class WorkflowTestCase(TestCase):
 
         m5_data = DemandModelDataLoader(M5DataLoader(), GenericSilverToGold()).get_demand_model_data()
 
-        transformed_demand = model.transform(m5_data)
+        transformed_demand = model.fit_transform(m5_data)
 
         model.fit(transformed_demand)
 

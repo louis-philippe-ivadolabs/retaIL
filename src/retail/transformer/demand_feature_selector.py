@@ -2,6 +2,7 @@ import logging
 from typing import List
 
 import pandas as pd
+from pandas import DataFrame
 
 from retail.domain import Feature
 from retail.transformer.interfaces import FeatureSelector
@@ -14,6 +15,11 @@ class DemandFeatureSelector(FeatureSelector):
                  ):
         self._feature_list = feature_list
         self._logger = logger or logging.getLogger(__name__)
+
+    def fit_transform(self,
+                      df: pd.DataFrame,
+                      ) -> pd.DataFrame:
+        return self.transform(df)
 
     def transform(self,
                   df: pd.DataFrame,

@@ -25,14 +25,21 @@ class DemandScope(Scope):
         self._dept_id_list = dept_id_list
         self._logger = logger or logging.getLogger(__name__)
 
-    def transform(self,
-                  df: pd.DataFrame,
-                  ) -> pd.DataFrame:
+    def fit_transform(self,
+                      df: pd.DataFrame,
+                      ) -> pd.DataFrame:
         original_n_rows = df.shape[0]
         if self._start_date:
             df = df[df["transaction_date"] >= self._start_date]
         if self._end_date:
             df = df[df["transaction_date"] < self._end_date]
+        df = self.transform(df)
+        return df
+
+    def transform(self,
+                  df: pd.DataFrame,
+                  ) -> pd.DataFrame:
+        original_n_rows = df.shape[0]
         if self._store_id_list:
             df = df[df["store_id"].isin(self._store_id_list)]
         if self._cat_id_list:

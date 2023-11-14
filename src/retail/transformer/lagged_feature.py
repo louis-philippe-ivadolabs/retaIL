@@ -17,6 +17,9 @@ class LaggedFeature(Featurizer):
         self._lag = lag
         self._logger = logger or logging.getLogger(__name__)
 
+    def fit_transform(self, df: pd.DataFrame) -> pd.DataFrame:
+        return self.transform(df)
+
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         df[self._transformed_feature_name] = df[self._feature_name].shift(self._lag) #FIXME: not so fast :-)
         return df

@@ -19,8 +19,15 @@ class GenericDemandPredictor(DemandPredictor):
         self._transformer_list = transformer_list
         self._logger = logger or logging.getLogger(__name__)
 
+    def fit_transform(self, sales_df: pd.DataFrame):
+        self._logger.info(f"Preprocessing the data (fit_transform, for training). Data shape: {sales_df.shape}")
+        for transformer in self._transformer_list:
+            sales_df = transformer.fit_transform(sales_df)
+        self._logger.info(f"Data shape after preprocessing: {sales_df.shape}")
+        return sales_df
+
     def transform(self, sales_df: pd.DataFrame):
-        self._logger.info(f"Preprocessing the data. Data shape: {sales_df.shape}")
+        self._logger.info(f"Preprocessing the data (transform, for predicting). Data shape: {sales_df.shape}")
         for transformer in self._transformer_list:
             sales_df = transformer.transform(sales_df)
         self._logger.info(f"Data shape after preprocessing: {sales_df.shape}")
