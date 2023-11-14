@@ -9,8 +9,10 @@ from retail.evaluator.generic_evaluator import GenericEvaluator
 from retail.transformer.demand_aggregator import AggregationLevel, DemandAggregator
 from retail.transformer.demand_feature_selector import DemandFeatureSelector
 from retail.transformer.demand_scope import DemandScope
-from retail.domain import Feature
+from retail.domain import Feature, TransformerTarget
 from retail.transformer.lagged_feature import LaggedFeature
+
+from sklearn.preprocessing import MinMaxScaler
 
 
 class WorkflowTestCase(TestCase):
@@ -64,7 +66,8 @@ class WorkflowTestCase(TestCase):
                 demand_scope,
                 *lagged_features,
                 aggregator,
-                feature_selector
+                feature_selector,
+                TransformerTarget(MinMaxScaler(clip=True), ["sales_qty", "price"])
             ]
         ).build()
 

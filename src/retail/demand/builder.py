@@ -1,8 +1,8 @@
-from typing import Tuple, List
+from typing import Tuple, List, Union
 
 from retail.demand.generic_demand_predictor import GenericDemandPredictor
 from retail.demand.interfaces import DemandPredictor
-from retail.domain import DemandDataset, Transformer, SplitStrategy, Feature
+from retail.domain import DemandDataset, Transformer, SplitStrategy, Feature, TransformerTarget
 from retail.split.basic import NOPSplitStrategy
 
 
@@ -14,7 +14,7 @@ class DemandModelBuilder:
         self._feature_list = []
         self._demand_predictor = None
 
-    def with_transformer_list(self, transformer_list: List[Transformer]) -> "DemandModelBuilder":
+    def with_transformer_list(self, transformer_list: List[Union[Transformer, TransformerTarget]]) -> "DemandModelBuilder":
         self._transformer_list.extend(transformer_list)
         return self
 

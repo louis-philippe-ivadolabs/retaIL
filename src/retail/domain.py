@@ -1,8 +1,10 @@
 from abc import abstractmethod
 from typing import Tuple, TypeVar, List, Callable, Dict
+from dataclasses import dataclass
 
 import pandas as pd
 import pandera as pa
+
 
 class Dataset:
 
@@ -38,6 +40,12 @@ class Transformer:
     @abstractmethod
     def transform(self, dataset: DatasetSubclasses) -> DatasetSubclasses:
         pass
+
+
+@dataclass
+class TransformerTarget:
+    transformer: Transformer
+    target: List[str]  # List of feature names to go under the transformation
 
 
 class Evaluator:

@@ -4,7 +4,7 @@ from typing import List
 import pandas as pd
 
 from retail.demand.interfaces import DemandPredictor
-from retail.domain import Feature, Transformer
+from retail.domain import Feature, Transformer, TransformerTarget
 
 
 class GenericDemandPredictor(DemandPredictor):
@@ -22,14 +22,20 @@ class GenericDemandPredictor(DemandPredictor):
     def fit_transform(self, sales_df: pd.DataFrame):
         self._logger.info(f"Preprocessing the data (fit_transform, for training). Data shape: {sales_df.shape}")
         for transformer in self._transformer_list:
-            sales_df = transformer.fit_transform(sales_df)
+            if isinstance(transformer, TransformerTarget):
+                sales_df.loc[:, transformer.target] = transformer.transformer.fit_transform(sales_df[transformer.target])
+            else:
+                sales_df = transformer.fit_transform(sales_df)
         self._logger.info(f"Data shape after preprocessing: {sales_df.shape}")
         return sales_df
 
     def transform(self, sales_df: pd.DataFrame):
         self._logger.info(f"Preprocessing the data (transform, for predicting). Data shape: {sales_df.shape}")
         for transformer in self._transformer_list:
-            sales_df = transformer.transform(sales_df)
+            if isinstance(transformer, TransformerTarget):
+                sales_df.loc[:, transformer.target] = transformer.transformer.transform(sales_df[transformer.target])
+            else:
+                sales_df = transformer.transform(sales_df)
         self._logger.info(f"Data shape after preprocessing: {sales_df.shape}")
         return sales_df
 

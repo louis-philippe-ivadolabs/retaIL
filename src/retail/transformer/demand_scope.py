@@ -51,3 +51,4 @@ class DemandScope(Scope):
         self._logger.info(
             f"DemandScope removed {original_n_rows - df.shape[0]} Rows. Number of remaining rows: {df.shape[0]}")
         return df
+
