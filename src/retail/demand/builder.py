@@ -2,7 +2,7 @@ from typing import Tuple, List, Union
 
 from retail.demand.generic_demand_predictor import GenericDemandPredictor
 from retail.demand.interfaces import DemandPredictor
-from retail.domain import DemandDataset, Transformer, SplitStrategy, Feature, TransformerTarget
+from retail.domain import DemandDataset, Transformer, SplitStrategy, Feature, TransformerFeatureSubset
 from retail.split.basic import NOPSplitStrategy
 
 
@@ -10,12 +10,17 @@ class DemandModelBuilder:
 
     def __init__(self):
         self._transformer_list = []
+        self._target_transformer_list = []
         self._split_strategy = NOPSplitStrategy()
         self._feature_list = []
         self._demand_predictor = None
 
-    def with_transformer_list(self, transformer_list: List[Union[Transformer, TransformerTarget]]) -> "DemandModelBuilder":
+    def with_transformer_list(self, transformer_list: List[Union[Transformer, TransformerFeatureSubset]]) -> "DemandModelBuilder":
         self._transformer_list.extend(transformer_list)
+        return self
+
+    def with_target_transformer_list(self, transformer_list: List[Transformer]) -> "DemandModelBuilder":
+        self._target_transformer_list.extend(transformer_list)
         return self
 
     def with_split(self, strategy: SplitStrategy) -> "DemandModelBuilder":
@@ -34,5 +39,6 @@ class DemandModelBuilder:
         return GenericDemandPredictor(
             self._feature_list,
             self._demand_predictor,
-            self._transformer_list
+            self._transformer_list,
+            self._target_transformer_list
         )

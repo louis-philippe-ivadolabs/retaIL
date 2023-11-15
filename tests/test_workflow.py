@@ -9,11 +9,11 @@ from retail.evaluator.generic_evaluator import GenericEvaluator
 from retail.transformer.demand_aggregator import AggregationLevel, DemandAggregator
 from retail.transformer.demand_feature_selector import DemandFeatureSelector
 from retail.transformer.demand_scope import DemandScope
-from retail.domain import Feature, TransformerTarget
+from retail.domain import Feature, TransformerFeatureSubset
 from retail.transformer.lagged_feature import LaggedFeature
 
-from sklearn.preprocessing import MinMaxScaler
-
+from sklearn.preprocessing import MinMaxScaler, FunctionTransformer
+import numpy as np
 
 class WorkflowTestCase(TestCase):
 
@@ -56,6 +56,8 @@ class WorkflowTestCase(TestCase):
 
         aggregator = DemandAggregator(AggregationLevel["year_week"], feature_list)
 
+        log_transformer = FunctionTransformer(np.log1p, np.expm1)
+
         model = DemandModelBuilder(
         ).with_demand_predictor(
             demand_predictor
@@ -67,7 +69,12 @@ class WorkflowTestCase(TestCase):
                 *lagged_features,
                 aggregator,
                 feature_selector,
-                TransformerTarget(MinMaxScaler(clip=True), ["sales_qty", "price"])
+                TransformerFeatureSubset(MinMaxScaler(clip=True), ["sales_qty", "price"]),
+                TransformerFeatureSubset(log_transformer, ["price"])
+            ]
+        ).with_target_transformer_list(
+            [
+                log_transformer
             ]
         ).build()
 

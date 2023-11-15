@@ -41,11 +41,15 @@ class Transformer:
     def transform(self, dataset: DatasetSubclasses) -> DatasetSubclasses:
         pass
 
+    @abstractmethod
+    def inverse_transform(self, dataset: DatasetSubclasses) -> DatasetSubclasses:
+        pass
+
 
 @dataclass
-class TransformerTarget:
+class TransformerFeatureSubset:
     transformer: Transformer
-    target: List[str]  # List of feature names to go under the transformation
+    feature_subset: List[str]  # List of feature names to go under the transformation
 
 
 class Evaluator:
